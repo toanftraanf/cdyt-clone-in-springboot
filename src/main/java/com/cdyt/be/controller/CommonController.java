@@ -10,12 +10,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/common")
 @Tag(name = "Common", description = "Common APIs for the application")
 public class CommonController {
-
-  @Value("${spring.data.redis.host}")
-  private String profile;
-
-  @GetMapping("/test")
-  public String Test() {
-    return "Hello World, current profile: " + profile;
-  }
+  
 }
