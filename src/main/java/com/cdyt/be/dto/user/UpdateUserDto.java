@@ -2,23 +2,19 @@ package com.cdyt.be.dto.user;
 
 import lombok.Data;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Data
-public class CreateUserDto {
+public class UpdateUserDto {
 
-  @NotBlank(message = "Full name is required")
   @Size(max = 255, message = "Full name must not exceed 255 characters")
   private String fullName;
 
-  @NotBlank(message = "Email is required")
   @Email(message = "Email should be valid")
   private String email;
 
-  @NotBlank(message = "Password is required")
   @Size(min = 6, message = "Password must be at least 6 characters")
   private String password;
 
@@ -32,6 +28,10 @@ public class CreateUserDto {
   private LocalDate dob;
 
   private String avatar;
+
+  private Boolean isActive;
+
+  private Boolean isVerified;
 
   private Set<Long> roleIds;
 }

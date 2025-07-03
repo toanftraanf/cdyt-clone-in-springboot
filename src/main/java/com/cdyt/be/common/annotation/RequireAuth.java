@@ -1,0 +1,21 @@
+package com.cdyt.be.common.annotation;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Target({ ElementType.TYPE, ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequireAuth {
+
+    /**
+     * Whether to check permissions (similar to your commented permission logic)
+     */
+    boolean checkPermissions() default false;
+
+    /**
+     * Required permission/role for this endpoint
+     */
+    String[] permissions() default {};
+}

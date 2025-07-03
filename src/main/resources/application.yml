@@ -1,6 +1,6 @@
 spring:
   application:
-    name: 'CDYT API'
+    name: "CDYT API"
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
@@ -28,3 +28,25 @@ spring:
       host: ${SPRING_REDIS_HOST}
       port: ${SPRING_REDIS_PORT}
       # password: ${SPRING_REDIS_PASSWORD:}
+
+# Security settings
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION} # in seconds
+  expiration-days: ${JWT_DATABASE_EXPIRATION_DAYS}
+  expiration-remember-days: ${JWT_DATABASE_EXPIRATION_REMEMBER_DAYS}
+
+# Authentication optimization settings
+auth:
+  cache:
+    enabled: true
+    ttl-minutes: 5
+    max-size: 1000
+  filter:
+    skip-public-paths: true
+    public-paths:
+      - "/api/auth/"
+      - "/swagger-ui/"
+      - "/v3/api-docs/"
+      - "/webjars/"
+      - "/actuator/health"
