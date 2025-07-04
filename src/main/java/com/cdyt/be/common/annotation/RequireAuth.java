@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface RequireAuth {
 
     /**
-     * Whether to check permissions (similar to your commented permission logic)
+     * Whether to check permissions
      */
     boolean checkPermissions() default false;
 

@@ -25,7 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/articles")
 @RequiredArgsConstructor
-@RequireAuth
+@RequireAuth(checkPermissions = true)
 @Tag(name = "Article Management", description = "APIs for managing articles")
 public class ArticleController extends BaseAuthController {
 

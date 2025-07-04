@@ -25,6 +25,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
+@RequireAuth(checkPermissions = true)
 @Tag(name = "User Management", description = "API for managing users")
 public class UserController extends BaseAuthController {
 

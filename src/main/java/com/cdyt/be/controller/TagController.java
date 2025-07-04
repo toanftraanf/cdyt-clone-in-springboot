@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/tags")
 @RequiredArgsConstructor
-@RequireAuth
+@RequireAuth(checkPermissions = true)
 @Tag(name = "Tag Management", description = "APIs for managing tags")
 public class TagController extends BaseAuthController {
 

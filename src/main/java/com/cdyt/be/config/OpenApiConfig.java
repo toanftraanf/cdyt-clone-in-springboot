@@ -28,9 +28,9 @@ public class OpenApiConfig {
             .description("CDYT API in Spring Boot")
             .version("v1.0")
             .contact(new Contact().name("Toan Tran")))
-        .addSecurityItem(new SecurityRequirement().addList("Bearer Authentication"))
+        .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
         .components(new Components()
-            .addSecuritySchemes("Bearer Authentication",
+            .addSecuritySchemes("bearerAuth",
                 new SecurityScheme()
                     .type(SecurityScheme.Type.HTTP)
                     .scheme("bearer")

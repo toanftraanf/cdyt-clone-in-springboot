@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("api/roles")
 @Tag(name = "Role", description = "APIs for managing roles")
 @RequiredArgsConstructor
-@RequireAuth
+@RequireAuth(checkPermissions = true)
 public class RoleController extends BaseAuthController {
 
   private final RoleService roleService;

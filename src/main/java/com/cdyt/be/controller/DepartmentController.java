@@ -1,5 +1,6 @@
 package com.cdyt.be.controller;
 
+import com.cdyt.be.common.annotation.RequireAuth;
 import com.cdyt.be.entity.Department;
 import com.cdyt.be.service.DepartmentService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/department")
+@RequireAuth(checkPermissions = true)
 @Tag(name = "Department", description = "APIs for managing departments")
 public class DepartmentController {
 

@@ -24,7 +24,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/categories")
 @RequiredArgsConstructor
-@RequireAuth
+@RequireAuth(checkPermissions = true)
 @Tag(name = "Category Management", description = "APIs for managing categories")
 public class CategoryController extends BaseAuthController {
 
