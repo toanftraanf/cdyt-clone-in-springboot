@@ -9,6 +9,7 @@ import com.cdyt.be.entity.Category;
 import com.cdyt.be.mapper.CategoryMapper;
 import com.cdyt.be.repository.CategoryRepository;
 import com.cdyt.be.util.TextUtils;
+import com.cdyt.be.util.CacheNames;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -60,6 +61,7 @@ public class CategoryService {
     /**
      * Get category hierarchy (root categories with their children recursively)
      */
+    @org.springframework.cache.annotation.Cacheable(CacheNames.CATEGORY_HIERARCHY)
     public List<CategoryResponseDto> getCategoryHierarchy() {
         List<Category> rootCategories = categoryRepository
                 .findByParentIsNullAndIsDeletedFalseOrderByDisplayOrderAscNameAsc();
@@ -114,7 +116,7 @@ public class CategoryService {
     /**
      * Create a new category
      */
-    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = CacheNames.CATEGORY_HIERARCHY, allEntries = true)
     public CategoryResponseDto createCategory(CreateCategoryDto createDto) {
         Category category = categoryMapper.toEntity(createDto);
 
@@ -137,7 +139,7 @@ public class CategoryService {
     /**
      * Update an existing category
      */
-    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = CacheNames.CATEGORY_HIERARCHY, allEntries = true)
     public CategoryResponseDto updateCategory(Long id, UpdateCategoryDto updateDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Category", id));
@@ -192,7 +194,7 @@ public class CategoryService {
     /**
      * Delete a category
      */
-    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = CacheNames.CATEGORY_HIERARCHY, allEntries = true)
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Category", id));
@@ -218,7 +220,7 @@ public class CategoryService {
     /**
      * Permanently delete a category (hard delete)
      */
-    @Transactional
+    @org.springframework.cache.annotation.CacheEvict(value = CacheNames.CATEGORY_HIERARCHY, allEntries = true)
     public void permanentlyDeleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> BusinessException.notFound("Category", id));
