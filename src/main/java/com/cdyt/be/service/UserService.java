@@ -1,5 +1,6 @@
 package com.cdyt.be.service;
 
+import com.cdyt.be.common.exception.BusinessException;
 import com.cdyt.be.dto.user.CreateUserDto;
 import com.cdyt.be.dto.user.UpdateUserDto;
 import com.cdyt.be.dto.user.UserResponseDto;
@@ -39,7 +40,7 @@ public class UserService implements UserDetailsService {
   public UserResponseDto createUser(CreateUserDto createUserDto) {
     // Check if email already exists
     if (userRepository.existsByEmail(createUserDto.getEmail())) {
-      throw new RuntimeException("Email already exists");
+      throw BusinessException.alreadyExists("User with email", createUserDto.getEmail());
     }
 
     // Use MapStruct to map DTO to Entity
@@ -68,7 +69,7 @@ public class UserService implements UserDetailsService {
   public UserResponseDto getUserByEmail(String email) {
     return userRepository.findByEmail(email)
         .map(userMapper::entityToResponseDto)
-        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        .orElseThrow(() -> BusinessException.notFound("User with email", email));
   }
 
   public Page<UserResponseDto> getAllUsers(Pageable pageable) {
@@ -85,7 +86,7 @@ public class UserService implements UserDetailsService {
 
   public UserResponseDto updateUser(Long id, UpdateUserDto updateUserDto) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> BusinessException.notFound("User", id));
 
     // Use MapStruct to update entity from DTO
     userMapper.updateEntityFromDto(updateUserDto, user);
@@ -111,7 +112,7 @@ public class UserService implements UserDetailsService {
 
   public void deleteUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> BusinessException.notFound("User", id));
 
     user.setIsDeleted(true);
     userRepository.save(user);
@@ -119,7 +120,7 @@ public class UserService implements UserDetailsService {
 
   public void activateUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> BusinessException.notFound("User", id));
 
     user.setIsActive(true);
     userRepository.save(user);
@@ -127,7 +128,7 @@ public class UserService implements UserDetailsService {
 
   public void deactivateUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> BusinessException.notFound("User", id));
 
     user.setIsActive(false);
     userRepository.save(user);
@@ -135,7 +136,7 @@ public class UserService implements UserDetailsService {
 
   public void verifyUser(Long id) {
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+        .orElseThrow(() -> BusinessException.notFound("User", id));
 
     user.setIsVerified(true);
     userRepository.save(user);
@@ -151,7 +152,6 @@ public class UserService implements UserDetailsService {
         Boolean.TRUE.equals(user.getIsActive()), true, true, true,
         user.getRole().stream()
             .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getRoleName()))
-            .collect(Collectors.toList())
-    );
+            .collect(Collectors.toList()));
   }
 }

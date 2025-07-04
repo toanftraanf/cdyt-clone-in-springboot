@@ -32,9 +32,9 @@ spring:
 # Security settings
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION} # in seconds
-  expiration-days: ${JWT_DATABASE_EXPIRATION_DAYS}
-  expiration-remember-days: ${JWT_DATABASE_EXPIRATION_REMEMBER_DAYS}
+  expiration-days: ${JWT_DATABASE_EXPIRATION_DAYS:1} # Normal login: 1 day
+  expiration-remember-days: ${JWT_DATABASE_EXPIRATION_REMEMBER_DAYS:7} # Remember me: 7 days
+  expiration: ${JWT_EXPIRATION:2592000} # JWT internal expiration: 30 days in seconds (not used for validation)
 
 # Authentication optimization settings
 auth:
@@ -50,3 +50,7 @@ auth:
       - "/v3/api-docs/"
       - "/webjars/"
       - "/actuator/health"
+
+viewcount:
+  sync:
+    limit: ${VIEWCOUNT_SYNC_LIMIT}

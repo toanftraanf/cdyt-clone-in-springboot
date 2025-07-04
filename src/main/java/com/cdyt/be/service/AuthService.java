@@ -1,5 +1,6 @@
 package com.cdyt.be.service;
 
+import com.cdyt.be.common.exception.BusinessException;
 import com.cdyt.be.dto.auth.LoginRequestDto;
 import com.cdyt.be.dto.auth.LoginResponseDto;
 import com.cdyt.be.dto.user.CreateUserDto;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,46 +30,42 @@ public class AuthService {
   private final JwtUtils jwtUtils;
   private final PasswordEncoder passwordEncoder;
 
-  @Value("${jwt.expiration-days}")
-  private int databaseExpirationDays;
+  @Value("${jwt.expiration-days:1}")
+  private int normalExpirationDays;
 
-  @Value("${jwt.expiration-remember-days}")
-  private int databaseExpirationRememberDays;
+  @Value("${jwt.expiration-remember-days:7}")
+  private int rememberMeExpirationDays;
 
+  @Transactional
   public LoginResponseDto login(LoginRequestDto req) {
     // Manual authentication - find user by email
     User user = userRepository.findByEmail(req.getEmail())
-        .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        .orElseThrow(() -> BusinessException.unauthorized("Invalid email or password"));
 
     // Check if user account is active
     if (!user.getIsActive()) {
-      throw new RuntimeException("Account is deactivated. Please contact administrator.");
+      throw BusinessException.forbidden("Account is deactivated. Please contact administrator.");
     }
 
     // Manual password verification
     if (!passwordEncoder.matches(req.getPassword(), user.getPassword())) {
-      throw new RuntimeException("Invalid email or password");
+      throw BusinessException.unauthorized("Invalid email or password");
     }
 
     // Optional: Check if user is verified (uncomment if needed)
     if (!user.getIsVerified()) {
-      throw new RuntimeException("Account is not verified. Please verify your email.");
+      throw BusinessException.forbidden("Account is not verified. Please verify your email.");
     }
 
     // Generate JWT token
     String token = jwtUtils.generateToken(user);
 
-    // Calculate token expiration based on remember password
-    LocalDateTime expirationDate = req.isRememberPassword()
-        ? LocalDateTime.now().plusDays(databaseExpirationRememberDays)
-        : LocalDateTime.now().plusDays(databaseExpirationDays);
+    // Calculate database token expiration (this controls actual token lifecycle)
+    int expirationDays = req.isRememberPassword() ? rememberMeExpirationDays : normalExpirationDays;
+    LocalDateTime expirationDate = LocalDateTime.now().plusDays(expirationDays);
 
     // Save token to database
-    UserToken userToken = new UserToken();
-    userToken.setUser(user);
-    userToken.setToken(token);
-    userToken.setExpiredDate(expirationDate);
-    userToken.setRememberPassword(req.isRememberPassword());
+    UserToken userToken = createUserToken(user, token, expirationDate, req.isRememberPassword());
     authRepository.save(userToken);
 
     return new LoginResponseDto(token, userToken.getExpiredDate());
@@ -76,7 +74,7 @@ public class AuthService {
   public LoginResponseDto register(CreateUserDto req) {
     // Check if user already exists
     if (userRepository.findByEmail(req.getEmail()).isPresent()) {
-      throw new RuntimeException("Email already exists");
+      throw BusinessException.alreadyExists("User with email", req.getEmail());
     }
 
     // Create new user
@@ -118,4 +116,43 @@ public class AuthService {
     return new LoginResponseDto(token, userToken.getExpiredDate());
   }
 
+  /**
+   * Logout user by removing token from database
+   */
+  @Transactional
+  public void logout(String token) {
+    authRepository.findByToken(token)
+        .ifPresent(authRepository::delete);
+  }
+
+  /**
+   * Logout user from all devices
+   */
+  @Transactional
+  public void logoutAllDevices(Long userId) {
+    authRepository.deleteByUserId(userId);
+  }
+
+  /**
+   * Cleanup expired tokens (can be called by scheduled task)
+   */
+  @Transactional
+  public int cleanupExpiredTokens() {
+    var expiredTokens = authRepository.findAll().stream()
+        .filter(token -> token.getExpiredDate().isBefore(LocalDateTime.now()))
+        .toList();
+
+    authRepository.deleteAll(expiredTokens);
+    return expiredTokens.size();
+  }
+
+  // Helper method
+  private UserToken createUserToken(User user, String token, LocalDateTime expiration, boolean rememberPassword) {
+    UserToken userToken = new UserToken();
+    userToken.setUser(user);
+    userToken.setToken(token);
+    userToken.setExpiredDate(expiration);
+    userToken.setRememberPassword(rememberPassword);
+    return userToken;
+  }
 }

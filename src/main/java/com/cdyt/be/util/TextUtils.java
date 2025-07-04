@@ -14,6 +14,35 @@ public class TextUtils {
     return normalized.replaceAll("\\p{M}", "");
   }
 
+  /**
+   * Generates a URL-friendly slug from the given input string.
+   * Converts to lowercase, removes accents, replaces spaces and special
+   * characters with hyphens,
+   * and removes consecutive hyphens.
+   */
+  public static String generateSlug(String input) {
+    if (input == null || input.trim().isEmpty()) {
+      return "";
+    }
+
+    // Remove accents and normalize
+    String slug = removeAccents(input.trim());
+
+    // Convert to lowercase
+    slug = slug.toLowerCase();
+
+    // Replace spaces and special characters with hyphens
+    slug = slug.replaceAll("[^a-z0-9]+", "-");
+
+    // Remove leading and trailing hyphens
+    slug = slug.replaceAll("^-+|-+$", "");
+
+    // Replace multiple consecutive hyphens with single hyphen
+    slug = slug.replaceAll("-+", "-");
+
+    return slug;
+  }
+
   public static String stringToMD5(String input) {
     if (input == null || input.isEmpty()) {
       return null;
